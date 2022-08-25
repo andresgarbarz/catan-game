@@ -1,11 +1,15 @@
 class Asentamiento:
-    pass
+    def __init__(self, jugador):
+        self.jugador = jugador
 
 class Ciudad:
     pass
 
 class Camino:
-    pass
+    def __init__(self, jugador):
+        self.jugador = jugador
 
 class Jugador:
-    pass
+    def __init__(self, nombre, color):
+        self.nombre = nombre
+        self.color = color
