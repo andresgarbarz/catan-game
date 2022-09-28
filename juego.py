@@ -87,14 +87,40 @@ def jugar_catan(jugadores,tablero):
                     if ficha in range(1, 20) and vertice in range(1, 7):
                         c_valid = True
                         tablero.colocar_camino(ficha, vertice, Camino(jugador))
-    for jugador in jugadores:
-        num = tirar_dados()
-        for i in range(19):
-            if tablero.obtener_numero_de_ficha(i+1) == num:
-                for j in range(6):
-                    settle = tablero.obtener_asentamiento(i+1, j+1)
-                    if settle:
-                        settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(i+1))
-        command = input("Inserte un comando: ")
-        if command == "fin":
-            return
+    
+    #Turnos normales
+    playing = True
+    while playing:
+        for jugador in jugadores:
+            num = tirar_dados()
+            for i in range(19):
+                if tablero.obtener_numero_de_ficha(i+1) == num:
+                    for j in range(6):
+                        settle = tablero.obtener_asentamiento(i+1, j+1)
+                        if settle:
+                            settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(i+1))
+            miturno = True
+            while miturno:
+                cinput = input("Inserte un comando: ").strip()
+                try:
+                    command, val1, val2 = cinput.split()
+                    val1, val2 = int(val1), int(val2)
+                except:
+                    command = cinput
+                if command == "fin":
+                    playing = False
+                    return
+                elif command == "pas":
+                    miturno = False
+                elif command == "ase":
+                    mats = jugador.cantidad_recursos()
+                    if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1 and mats["Lana"] >= 1 and mats["Trigo"] >= 1:
+                        jugador.quitar_recursos(["Ladrillo", "Madera", "Lana", "Trigo"])
+                        tablero.colocar_asentamiento(val1, val2, Asentamiento(jugador))
+                elif command == "cam":
+                    mats = jugador.cantidad_recursos()
+                    if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1:
+                        jugador.quitar_recursos(["Ladrillo", "Madera"])
+                        tablero.colocar_camino(val1, val2, Camino(jugador))
+                else:
+                    pass

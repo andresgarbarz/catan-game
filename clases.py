@@ -18,3 +18,10 @@ class Jugador:
         self.recursos[recurso] += 1
     def cantidad_de(self, recurso):
         return self.recursos[recurso]
+    def cantidad_recursos(self):
+        return self.recursos
+    def quitar_recursos(self, recs):
+        for r in recs:
+            self.recursos[r] -= 1
+            print("quitado")
+            print(r)
