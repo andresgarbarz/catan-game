@@ -72,8 +72,18 @@ def jugar_catan(jugadores,tablero):
                     ficha, vertice = int(ficha), int(vertice)
                     if ficha in range(1, 20) and vertice in range(1, 7):
                         a_valid = True
-                        tablero.colocar_asentamiento(ficha, vertice, Asentamiento(jugador))
+                        ase = Asentamiento(jugador)
+                        tablero.colocar_asentamiento(ficha, vertice, ase)
                         fichasnums[jugador].append(tablero.obtener_numero_de_ficha(ficha))
+                        if "segundo asentamiento" in message:
+                            print("entra")
+                            for f in range(19):
+                                for j in range(6):
+                                    settle = tablero.obtener_asentamiento(f+1, j+1)
+                                    print(ase, settle)
+                                    if settle == ase:
+                                        print("entra2")
+                                        settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(f+1))
             else:
                 if i == 1:
                     message = "Coloque primer camino: "
