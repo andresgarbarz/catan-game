@@ -10,6 +10,12 @@ class Camino:
         self.jugador = jugador
 
 class Jugador:
+    """ players = []
+    def __new__(cls, *args, **kwargs):
+        p = super().__new__(cls, *args, **kwargs)
+        Jugador.players.append(p.nombre) """
+    #Esto fue un intento super complejo para obtener todos los jugadores porque nos olvidamos que era un parámetro de jugar_catan() y queríamos dejarlo porque no todos los días se sobreescriben métodos mágicos
+
     def __init__(self, nombre, color):
         self.nombre = nombre
         self.color = color
@@ -25,3 +31,5 @@ class Jugador:
             self.recursos[r] -= 1
             print("quitado")
             print(r)
+    def players_in_game(players):
+        return players

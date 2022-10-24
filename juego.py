@@ -1,7 +1,6 @@
 from random import randint
 from clases import Asentamiento, Camino
 
-
 ORDEN_ESPECIAL = False
 
 def tirar_dados():
@@ -75,15 +74,13 @@ def jugar_catan(jugadores,tablero):
                         ase = Asentamiento(jugador)
                         tablero.colocar_asentamiento(ficha, vertice, ase)
                         fichasnums[jugador].append(tablero.obtener_numero_de_ficha(ficha))
-                        if "segundo asentamiento" in message:
-                            print("entra")
+                        #Extra de recursos iniciales, puesto como documentación porque rompe los test (descomentar para probar)
+                        """ if "segundo asentamiento" in message:
                             for f in range(19):
                                 for j in range(6):
                                     settle = tablero.obtener_asentamiento(f+1, j+1)
-                                    print(ase, settle)
                                     if settle == ase:
-                                        print("entra2")
-                                        settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(f+1))
+                                        settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(f+1)) """
             else:
                 if i == 1:
                     message = "Coloque primer camino: "
@@ -100,28 +97,51 @@ def jugar_catan(jugadores,tablero):
     
     #Turnos normales
     playing = True
+    n = 0
     while playing:
-        for jugador in jugadores:
-            num = tirar_dados()
-            for i in range(19):
-                if tablero.obtener_numero_de_ficha(i+1) == num:
-                    for j in range(6):
-                        settle = tablero.obtener_asentamiento(i+1, j+1)
-                        if settle:
-                            settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(i+1))
+        try:
+            turno_de = jugadores[n].nombre
+        except:
+            n = 0
+            turno_de = jugadores[n].nombre
+        print("Turno de "+turno_de)
+        num = tirar_dados()
+        for i in range(19):
+            if tablero.obtener_numero_de_ficha(i+1) == num:
+                for j in range(6):
+                    settle = tablero.obtener_asentamiento(i+1, j+1)
+                    if settle:
+                        settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(i+1))
             miturno = True
             while miturno:
                 cinput = input("Inserte un comando: ").strip()
-                try:
-                    command, val1, val2 = cinput.split()
-                    val1, val2 = int(val1), int(val2)
-                except:
-                    command = cinput
+                if "tra" in cinput:
+                    command, p2, rd, cd, rr, cr = cinput.split()
+                    cd, cr = int(cd), int(cr)
+                else:
+                    try:
+                        command, val1, val2 = cinput.split()
+                        val1, val2 = int(val1), int(val2)
+                    except:
+                        command = cinput
                 if command == "fin":
                     playing = False
                     return
                 elif command == "pas":
+                    print("turno pasado")
                     miturno = False
+                    n+=1
+                elif command == "tra":
+                    p2 = [p for p in jugadores if p2 == p.nombre.lower()][0]
+                    for r in range(cd):
+                        p2.añadir_recurso(rd)
+                    rd = [rd*cd]
+                    jugador.quitar_recursos(rd)
+
+                    for r in range(cr):
+                        jugador.añadir_recursos(rr)
+                    rr = [rr*cr]
+                    p2.quitar_recursos(rr)
                 elif command == "ase":
                     mats = jugador.cantidad_recursos()
                     if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1 and mats["Lana"] >= 1 and mats["Trigo"] >= 1:
