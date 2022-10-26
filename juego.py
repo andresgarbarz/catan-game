@@ -1,5 +1,5 @@
 from random import randint
-from clases import Asentamiento, Camino
+from clases import Asentamiento, Camino, Jugador
 
 ORDEN_ESPECIAL = False
 
@@ -51,7 +51,7 @@ def rellenar_tablero(tablero):
     m_used[9] = None
     print(m_used)        
 
-def jugar_catan(jugadores,tablero):
+def jugar_catan(jugadores : list[Jugador(nombre, color)],tablero):
     fichasnums = {}
     for jugador in jugadores:
         fichasnums[jugador] = []
@@ -101,7 +101,7 @@ def jugar_catan(jugadores,tablero):
     while playing:
         try:
             turno_de = jugadores[n].nombre
-        except:
+        except IndexError:
             n = 0
             turno_de = jugadores[n].nombre
         print("Turno de "+turno_de)
@@ -112,45 +112,45 @@ def jugar_catan(jugadores,tablero):
                     settle = tablero.obtener_asentamiento(i+1, j+1)
                     if settle:
                         settle.jugador.añadir_recurso(tablero.obtener_recurso_de_ficha(i+1))
-            miturno = True
-            while miturno:
-                cinput = input("Inserte un comando: ").strip()
-                if "tra" in cinput:
-                    command, p2, rd, cd, rr, cr = cinput.split()
-                    cd, cr = int(cd), int(cr)
-                else:
-                    try:
-                        command, val1, val2 = cinput.split()
-                        val1, val2 = int(val1), int(val2)
-                    except:
-                        command = cinput
-                if command == "fin":
-                    playing = False
-                    return
-                elif command == "pas":
-                    print("turno pasado")
-                    miturno = False
-                    n+=1
-                elif command == "tra":
-                    p2 = [p for p in jugadores if p2 == p.nombre.lower()][0]
-                    for r in range(cd):
-                        p2.añadir_recurso(rd)
-                    rd = [rd*cd]
-                    jugador.quitar_recursos(rd)
+        miturno = True
+        while miturno:
+            cinput = input("Inserte un comando: ").strip()
+            if "tra" in cinput:
+                command, p2, rd, cd, rr, cr = cinput.split()
+                cd, cr = int(cd), int(cr)
+            else:
+                try:
+                    command, val1, val2 = cinput.split()
+                    val1, val2 = int(val1), int(val2)
+                except:
+                    command = cinput
+            if command == "fin":
+                playing = False
+                return
+            elif command == "pas":
+                print("turno pasado")
+                miturno = False
+                n+=1
+            elif command == "tra":
+                p2 = [p for p in jugadores if p2.lower() == p.nombre.lower()][0]
+                for r in range(cd):
+                    p2.añadir_recurso(rd)
+                rd = [rd]*cd
+                jugador.quitar_recursos(rd)
 
-                    for r in range(cr):
-                        jugador.añadir_recursos(rr)
-                    rr = [rr*cr]
-                    p2.quitar_recursos(rr)
-                elif command == "ase":
-                    mats = jugador.cantidad_recursos()
-                    if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1 and mats["Lana"] >= 1 and mats["Trigo"] >= 1:
-                        jugador.quitar_recursos(["Ladrillo", "Madera", "Lana", "Trigo"])
-                        tablero.colocar_asentamiento(val1, val2, Asentamiento(jugador))
-                elif command == "cam":
-                    mats = jugador.cantidad_recursos()
-                    if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1:
-                        jugador.quitar_recursos(["Ladrillo", "Madera"])
-                        tablero.colocar_camino(val1, val2, Camino(jugador))
-                else:
-                    pass
+                for r in range(cr):
+                    jugador.añadir_recurso(rr)
+                rr = [rr]*cr
+                p2.quitar_recursos(rr)
+            elif command == "ase":
+                mats = jugador.cantidad_recursos()
+                if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1 and mats["Lana"] >= 1 and mats["Trigo"] >= 1:
+                    jugador.quitar_recursos(["Ladrillo", "Madera", "Lana", "Trigo"])
+                    tablero.colocar_asentamiento(val1, val2, Asentamiento(jugador))
+            elif command == "cam":
+                mats = jugador.cantidad_recursos()
+                if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1:
+                    jugador.quitar_recursos(["Ladrillo", "Madera"])
+                    tablero.colocar_camino(val1, val2, Camino(jugador))
+            else:
+                pass
