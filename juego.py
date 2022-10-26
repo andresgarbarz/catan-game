@@ -51,7 +51,7 @@ def rellenar_tablero(tablero):
     m_used[9] = None
     print(m_used)        
 
-def jugar_catan(jugadores : list[Jugador(nombre, color)],tablero):
+def jugar_catan(jugadores,tablero):
     fichasnums = {}
     for jugador in jugadores:
         fichasnums[jugador] = []
@@ -136,21 +136,23 @@ def jugar_catan(jugadores : list[Jugador(nombre, color)],tablero):
                 for r in range(cd):
                     p2.añadir_recurso(rd)
                 rd = [rd]*cd
-                jugador.quitar_recursos(rd)
+                jugadores[n].quitar_recursos(rd)
 
                 for r in range(cr):
-                    jugador.añadir_recurso(rr)
+                    jugadores[n].añadir_recurso(rr)
                 rr = [rr]*cr
                 p2.quitar_recursos(rr)
+                print(jugadores[n].nombre + "=" + str(jugadores[n].cantidad_recursos()))
+                print(p2.nombre + "=" + str(p2.cantidad_recursos()))
             elif command == "ase":
-                mats = jugador.cantidad_recursos()
+                mats = jugadores[n].cantidad_recursos()
                 if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1 and mats["Lana"] >= 1 and mats["Trigo"] >= 1:
-                    jugador.quitar_recursos(["Ladrillo", "Madera", "Lana", "Trigo"])
-                    tablero.colocar_asentamiento(val1, val2, Asentamiento(jugador))
+                    jugadores[n].quitar_recursos(["Ladrillo", "Madera", "Lana", "Trigo"])
+                    tablero.colocar_asentamiento(val1, val2, Asentamiento(jugadores[n]))
             elif command == "cam":
-                mats = jugador.cantidad_recursos()
+                mats = jugadores[n].cantidad_recursos()
                 if mats["Ladrillo"] >= 1 and mats["Madera"] >= 1:
-                    jugador.quitar_recursos(["Ladrillo", "Madera"])
-                    tablero.colocar_camino(val1, val2, Camino(jugador))
+                    jugadores[n].quitar_recursos(["Ladrillo", "Madera"])
+                    tablero.colocar_camino(val1, val2, Camino(jugadores[n]))
             else:
                 pass
