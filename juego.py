@@ -21,47 +21,27 @@ def rellenar_tablero(tablero):
 		tablero.colocar_recurso_y_numero(i+1, recursos[j], numeros[j])
 		j += 1
 
-def construir(tablero, jugador, numero, clase):
-	if clase is Asentamiento:
-		tipo_pos = "vertice"
-		chequeo = tablero.obtener_asentamiento
-		accion = tablero.colocar_asentamiento
-	else:
-		tipo_pos = "arista"
-		chequeo = tablero.obtener_camino
-		accion = tablero.colocar_camino
-
-	while True:
-		s = input(f"Coloque {clase.__name__.lower()} n* {numero}: ")
-		if (s == "fin"): return False
-		vals = s.translate(str.maketrans('', '', string.punctuation)).split()
-		if len(vals) != 2:
-			print("Debe ingresar dos valores")
-			continue
-		ficha, pos = map(int, vals)
-		
-		if (ficha not in range(1,20)):
-			print("Ficha fuera de rango, ingresa un número entre 1 y 19")
-			continue
-		if (pos not in range(1,7)):
-			print(f"{tipo_pos.capitalize()} fuera de rango, ingresa un número entre 1 y 6")
-			continue
-		if chequeo(ficha, pos) is None:
-			break
-		print(f"Ya hay un {clase.__name__.lower()} en esa posición, intente de nuevo")
-		
-	accion(ficha, pos, clase(jugador))
-	return True
+def construir(tablero, jugador, clase, coords, esGratis=False):
+	if len(coords) != 2:
+		print("Debe ingresar dos valores")
+		return False
+	ficha, pos = map(int, coords)
+	return jugador.construir(clase, tablero, ficha, pos, esGratis)
 
 def jugar_catan(jugadores,tablero):
+
+	# Set up
 	for i in range(2):
 		orden = jugadores if i == 0 else reversed(jugadores)
 		for j in orden:
-			# Colocar asentamientos
-			if not construir(tablero, j, i+1, Asentamiento, True): return
-
-			# Colocar caminos
-			if not construir(tablero, j, i+1, Camino, True): return
+			for clase in (Asentamiento, Camino):
+				while True:
+					s = input(f"Coloque {clase.__name__.lower()} n* {i+1}: ")
+					if s == "fin":
+						return
+					coords = s.translate(str.maketrans('', '', string.punctuation)).split()
+					if construir(tablero, j, clase, coords, esGratis=True):
+						break
 
 	# Juego
 	while True:
@@ -80,9 +60,13 @@ def jugar_catan(jugadores,tablero):
 			# Acciones
 			while True:
 				accion = input("Que desea hacer: ")
-				if accion == "ase":
-					construir(tablero, j, Asentamiento)
-				elif accion == "fin":
+				partes = accion.split()
+				cmd = partes[0] if partes else ""
+				if cmd == "ase":
+					construir(tablero, j, Asentamiento, partes[1:])
+				elif cmd == "cam":
+					construir(tablero, j, Camino, partes[1:])
+				elif cmd == "fin":
 					return
-				elif accion == "pas":
+				elif cmd == "pas":
 					break
