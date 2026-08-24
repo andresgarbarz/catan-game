@@ -59,7 +59,7 @@ def jugar_catan(jugadores,tablero):
 							ase.dar_recurso(tablero.obtener_recurso_de_ficha(ficha))
 			# Acciones
 			while True:
-				accion = input("Que desea hacer: ")
+				accion = input(f"{j.nombre}, qué desea hacer: ")
 				partes = accion.split()
 				cmd = partes[0] if partes else ""
 				if cmd == "ase":
