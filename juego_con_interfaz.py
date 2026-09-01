@@ -1,6 +1,11 @@
+import os
+
+# x, y from top-left of the display
+os.environ["SDL_VIDEO_WINDOW_POS"] = "100,50"  
+
 from clases import Jugador
 from interfaz import jugar_con_interfaz
-from juego import rellenar_tablero, tirar_dados
+from juego import rellenar_tablero
 from tablero import TableroCatan
 
 andy = Jugador("Andy", (255,0,0))

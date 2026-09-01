@@ -69,12 +69,14 @@ class HexagonoCatan:
         assert vertice in range(1,7), f"El vértice es un número del 1 al 6, no {vertice}"
         nodo = self._grafo.nodos[vertice - 1]
         nodo.contenido = asentamiento
-    def obtener_camino(self,arista):
-        assert arista in range(1,7), f"La arista es un número del 1 al 6, no {arista}"
+        return asentamiento
+    def obtener_camino(self, arista):
+        assert arista in range(1, 7), f"La arista es un número del 1 al 6, no {arista}"
         return self._grafo.aristas[arista - 1].contenido
     def colocar_camino(self,arista,camino):
         assert arista in range(1,7), f"La arista es un número del 1 al 6, no {arista}"
         self._grafo.aristas[arista - 1].contenido = camino
+        return camino
     def obtener_asentamientos(self):
         #Modificar el None
         return [(pos,nodo.contenido) for pos,nodo in enumerate(self._grafo.nodos) if nodo.contenido != None]
@@ -170,13 +172,13 @@ class TableroCatan:
         return self._fichas[ficha - 1].obtener_asentamiento(vertice)
 
     def colocar_asentamiento(self,ficha,vertice,asentamiento):
-        self._fichas[ficha - 1].colocar_asentamiento(vertice,asentamiento)
+        return self._fichas[ficha - 1].colocar_asentamiento(vertice,asentamiento)
 
     def obtener_camino(self,ficha,arista):
         return self._fichas[ficha - 1].obtener_camino(arista)
 
     def colocar_camino(self,ficha,arista,camino):
-        self._fichas[ficha - 1].colocar_camino(arista,camino)
+        return self._fichas[ficha - 1].colocar_camino(arista,camino)
 
     def asentamientos_por_ficha(self,numero_de_ficha):
         ficha = self._fichas[numero_de_ficha - 1]

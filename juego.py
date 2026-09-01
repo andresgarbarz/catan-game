@@ -29,19 +29,29 @@ def construir(tablero, jugador, clase, coords, esGratis=False):
 	return jugador.construir(clase, tablero, ficha, pos, esGratis)
 
 def jugar_catan(jugadores,tablero):
-
 	# Set up
 	for i in range(2):
 		orden = jugadores if i == 0 else reversed(jugadores)
 		for j in orden:
 			for clase in (Asentamiento, Camino):
+				# Intento construir
 				while True:
 					s = input(f"Coloque {clase.__name__.lower()} n* {i+1}: ")
 					if s == "fin":
 						return
 					coords = s.translate(str.maketrans('', '', string.punctuation)).split()
-					if construir(tablero, j, clase, coords, esGratis=True):
+					construccion = construir(tablero, j, clase, coords, esGratis=True)
+					if construccion:
 						break
+				if i == 1 and isinstance(construccion, Asentamiento):
+					ficha, vertice = map(int, coords)
+					nodo = tablero.obtener_nodo(ficha, vertice)
+					for f in range(1, 20):
+						for v in range(1, 7):
+							if tablero.obtener_nodo(f, v) == nodo:
+								construccion.dar_recurso(tablero.obtener_recurso_de_ficha(f))
+
+
 
 	# Juego
 	while True:
@@ -53,8 +63,8 @@ def jugar_catan(jugadores,tablero):
 					continue
 				# Resto del tablero
 				if (tablero.obtener_numero_de_ficha(ficha) == dados):
-					for vertice in range(1, 7):
-						ase = tablero.obtener_asentamiento(ficha, vertice)
+					asentamientos = tablero.asentamientos_por_ficha(ficha)
+					for ase in asentamientos:
 						if ase is not None:
 							ase.dar_recurso(tablero.obtener_recurso_de_ficha(ficha))
 			# Acciones

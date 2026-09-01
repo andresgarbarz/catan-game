@@ -39,7 +39,7 @@ class Asentamiento(Construccion):
 
 	@classmethod
 	def colocar_en(cls, tablero, ficha, pos, jugador):
-		tablero.colocar_asentamiento(ficha, pos, cls(jugador))
+		return tablero.colocar_asentamiento(ficha, pos, cls(jugador))
 
 class Ciudad(Construccion):
 	tipo_pos = "vertice"
@@ -63,7 +63,7 @@ class Camino(Construccion):
 
 	@classmethod
 	def colocar_en(cls, tablero, ficha, pos, jugador):
-		tablero.colocar_camino(ficha, pos, cls(jugador))
+		return tablero.colocar_camino(ficha, pos, cls(jugador))
 
 class Jugador:
 	def __init__(self, nombre, color) -> None:
@@ -91,11 +91,7 @@ class Jugador:
 		if not gratis and not self.cobrar(clase.costo):
 			print("No tiene recursos suficientes")
 			return False
-		clase.colocar_en(tablero, ficha, pos, self)
-		return True
+		return clase.colocar_en(tablero, ficha, pos, self)
 
 	def cantidad_de(self, rec):
 		return self.recursos[rec]
-
-	def cant_asentamientos(self):
-		return
