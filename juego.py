@@ -123,6 +123,7 @@ def jugar_catan(jugadores,tablero):
 						print(ERROR_INT_FORMAT)
 						continue
 
+					# Obtengo target
 					nombres_otros = []
 					target = None
 					for jug in jugadores:
@@ -136,30 +137,32 @@ def jugar_catan(jugadores,tablero):
 						print("Debe ingresar un nombre de jugador válido.\nLa lista de jugadores es:", nombres_otros)
 						continue
 
+					# Chequeo materiales deseados
 					doy_pos = partes.index('doy')
 					deseados = partes[3:doy_pos]
 					recibidos = int_calcular_costos(deseados)
 					if not recibidos:
 						continue
 
+					# Chequeo materiales ofrecidos
 					ofrecidos = partes[doy_pos+1:]
 					entregados = int_calcular_costos(ofrecidos)
 					if not entregados:
 						continue
 					
+					# Tradear
 					j.cobrar(entregados)
 					target.cobrar(recibidos)
 
 					j.heredar(recibidos)
 					target.heredar(entregados)
+
+					# Formato de intercambio:
+					# int [target-nombre] [{Recursos-deseados}] [{Recursos-ofrecidos}]
+					# Ejemplo:
+					# int Natan quiero 1 Lana 1 Trigo doy 1 Ladrillo
 					
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":
 					break
-
-# int [target-nombre] [{Recursos-deseados}] [{Recursos-ofrecidos}]
-
-# int Natan quiero 1 Lana 1 Trigo doy 1 Ladrillo
-
-# [int, Natan, quiero, 1, Lana, doy, 1, Ladrillo]
