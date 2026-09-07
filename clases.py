@@ -85,6 +85,10 @@ class Jugador:
 			self.recursos[rec] -= n
 		return True
 
+	def heredar(self, costo):
+		for rec, n in costo.items():
+			self.recursos[rec] += n
+
 	def construir(self, clase, tablero, ficha, pos, gratis=False):
 		if not clase.posicion_valida(tablero, ficha, pos):
 			return False

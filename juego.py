@@ -1,8 +1,16 @@
 import random
+from re import M
 import string
+
+from _pytest._py.error import R
+from numpy.char import isalpha, isdigit
 
 from clases import Asentamiento, Camino
 ORDEN_ESPECIAL = True
+
+MATERIALES = ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]
+
+ERROR_INT_FORMAT = "Para intercambiar, ingrese 'int [target] quiero [cant] [recurso] (n veces) doy [cant] [recurso] (m veces)'"
 
 def tirar_dados():
 	return random.randint(1,6) + random.randint(1,6)
@@ -35,6 +43,32 @@ def construir(tablero, jugador, clase, coords, esGratis=False):
 		return False
 	ficha, pos = map(int, coords)
 	return jugador.construir(clase, tablero, ficha, pos, esGratis)
+
+def int_calcular_costos(lista_recursos):
+	if len(lista_recursos) % 2 != 0:
+		print(ERROR_INT_FORMAT)
+		return False
+
+	costos = {}
+
+	for i in range(0, len(lista_recursos), 2):
+		cant = lista_recursos[i]
+		rec = lista_recursos[i+1].capitalize()
+		if not isdigit(cant) or not isalpha(rec):
+			print(ERROR_INT_FORMAT)
+			return False
+
+		if rec not in MATERIALES:
+			print("Debe ingresar un recurso válido, la lista es:", MATERIALES)
+			return False
+
+		cant = int(cant)
+		if cant < 1:
+			print("No es posible intercambiar 0 recursos, no se aceptan regalos!")
+			return False
+
+		costos[rec] = cant	
+	return costos
 
 def jugar_catan(jugadores,tablero):
 	# Set up
@@ -77,13 +111,55 @@ def jugar_catan(jugadores,tablero):
 			# Acciones
 			while True:
 				accion = input(f"{j.nombre}, qué desea hacer: ")
-				partes = accion.split()
+				partes = accion.lower().translate(str.maketrans('', '', string.punctuation)).split()
 				cmd = partes[0] if partes else ""
 				if cmd == "ase":
 					construir(tablero, j, Asentamiento, partes[1:])
 				elif cmd == "cam":
 					construir(tablero, j, Camino, partes[1:])
+				elif cmd == "int":	
+					# Formato inválido 
+					if len(partes) < 8 or partes[2] != "quiero" or "doy" not in partes[:-2]:
+						print(ERROR_INT_FORMAT)
+						continue
+
+					nombres_otros = []
+					target = None
+					for jug in jugadores:
+						if jug != j:
+							nombres_otros.append(jug.nombre)
+							if jug.nombre.lower() == partes[1]:
+								target = jug
+
+					# Jugador inválido
+					if not target:
+						print("Debe ingresar un nombre de jugador válido.\nLa lista de jugadores es:", nombres_otros)
+						continue
+
+					doy_pos = partes.index('doy')
+					deseados = partes[3:doy_pos]
+					recibidos = int_calcular_costos(deseados)
+					if not recibidos:
+						continue
+
+					ofrecidos = partes[doy_pos+1:]
+					entregados = int_calcular_costos(ofrecidos)
+					if not entregados:
+						continue
+					
+					j.cobrar(entregados)
+					target.cobrar(recibidos)
+
+					j.heredar(recibidos)
+					target.heredar(entregados)
+					
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":
 					break
+
+# int [target-nombre] [{Recursos-deseados}] [{Recursos-ofrecidos}]
+
+# int Natan quiero 1 Lana 1 Trigo doy 1 Ladrillo
+
+# [int, Natan, quiero, 1, Lana, doy, 1, Ladrillo]
