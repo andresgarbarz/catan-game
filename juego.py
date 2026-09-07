@@ -10,15 +10,23 @@ def tirar_dados():
 def rellenar_tablero(tablero):
 	recursos = (["Ladrillo"]*3 + ["Piedra"]*3 + ["Trigo"]*4 + ["Lana"]*4 + ["Madera"]*4)
 	random.shuffle(recursos)
-	
-	numeros = [2, 12] + [x for x in range(3, 12) if x != 7]*2
-	random.shuffle(numeros)
+
+	# Orden de numeros de Catan original
+	numeros = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
+
+	ESPIRALES = [
+		[1, 4, 8, 13, 17, 18, 19, 16, 12, 7, 3, 2, 5, 9, 14, 15, 11, 6], # Esquina 1
+		[8, 13, 17, 18, 19, 16, 12, 7, 3, 2, 1, 4, 9, 14, 15, 11, 6, 5], # Esquina 8
+		[17, 18, 19, 16, 12, 7, 3, 2, 1, 4, 8, 13, 14, 15, 11, 6, 5, 9], # Esquina 17
+		[19, 16, 12, 7, 3, 2, 1, 4, 8, 13, 17, 18, 15, 11, 6, 5, 9, 14], # Esquina 19
+		[12, 7, 3, 2, 1, 4, 8, 13, 17, 18, 19, 16, 11, 6, 5, 9, 14, 15], # Esquina 12
+		[3, 2, 1, 4, 8, 13, 17, 18, 19, 16, 12, 7, 6, 5, 9, 14, 15, 11], # Esquina 3
+	]
+	espiral = random.choice(ESPIRALES)
 
 	j = 0
-	for i in range(19):
-		if i+1 == 10:
-			continue
-		tablero.colocar_recurso_y_numero(i+1, recursos[j], numeros[j])
+	for ficha in espiral:
+		tablero.colocar_recurso_y_numero(ficha, recursos[j], numeros[j])
 		j += 1
 
 def construir(tablero, jugador, clase, coords, esGratis=False):
@@ -43,6 +51,7 @@ def jugar_catan(jugadores,tablero):
 					construccion = construir(tablero, j, clase, coords, esGratis=True)
 					if construccion:
 						break
+				# Recursos iniciales
 				if i == 1 and isinstance(construccion, Asentamiento):
 					ficha, vertice = map(int, coords)
 					nodo = tablero.obtener_nodo(ficha, vertice)
@@ -50,8 +59,6 @@ def jugar_catan(jugadores,tablero):
 						for v in range(1, 7):
 							if tablero.obtener_nodo(f, v) == nodo:
 								construccion.dar_recurso(tablero.obtener_recurso_de_ficha(f))
-
-
 
 	# Juego
 	while True:
