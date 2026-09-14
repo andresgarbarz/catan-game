@@ -88,6 +88,8 @@ class HexagonoCatan:
         caminos = nodo.aristas
         nodos_adyacentes = []
         for arista in caminos:
+            if arista is None:
+                continue
             nodos_adyacentes.append(next(n for n in arista.nodos if not n is nodo))
         return nodos_adyacentes
 
@@ -96,11 +98,17 @@ class HexagonoCatan:
         nodos_adyacentes : list[NodoCatan] = arista.nodos
         aristas_adyacentes = []
         for nodo in nodos_adyacentes:
+            if nodo is None:
+                continue
             aristas : AristaCatan = nodo.aristas
             for a in aristas:
                 if a != arista:
                     aristas_adyacentes.append(a)
         return aristas_adyacentes
+
+    def aristas_adyacentes_a_nodo(self, numero_de_nodo):
+        nodo = self._grafo.nodos[numero_de_nodo - 1]
+        return [arista for arista in nodo.aristas if arista is not None]
 
     def obtener_nodo(self,numero_de_nodo):
         return self._grafo.nodos[numero_de_nodo - 1]
@@ -208,6 +216,10 @@ class TableroCatan:
     def asentamientos_adyacentes_a_nodo(self,numero_de_ficha,numero_nodo):
         ficha = self._fichas[numero_de_ficha - 1]
         return [nodo.contenido for nodo in ficha.nodos_adyacentes(numero_nodo) if nodo.contenido != None]
+
+    def caminos_adyacentes_a_nodo(self, numero_de_ficha, numero_nodo):
+        ficha = self._fichas[numero_de_ficha - 1]
+        return [arista.contenido for arista in ficha.aristas_adyacentes_a_nodo(numero_nodo) if arista.contenido is not None]
 
     def caminos_adyacentes_a_arista(self,numero_de_ficha,numero_arista):
         ficha = self._fichas[numero_de_ficha - 1]

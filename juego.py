@@ -37,12 +37,12 @@ def rellenar_tablero(tablero):
 		tablero.colocar_recurso_y_numero(ficha, recursos[j], numeros[j])
 		j += 1
 
-def construir(tablero, jugador, clase, coords, esGratis=False):
+def construir(tablero, jugador, tipo_construccion, coords, esGratis=False):
 	if len(coords) != 2:
 		print("Debe ingresar dos valores")
 		return False
 	ficha, pos = map(int, coords)
-	return jugador.construir(clase, tablero, ficha, pos, esGratis)
+	return jugador.construir(tipo_construccion, tablero, ficha, pos, esGratis)
 
 def int_calcular_costos(lista_recursos):
 	if len(lista_recursos) % 2 != 0:
@@ -75,14 +75,14 @@ def jugar_catan(jugadores,tablero):
 	for i in range(2):
 		orden = jugadores if i == 0 else reversed(jugadores)
 		for j in orden:
-			for clase in (Asentamiento, Camino):
+			for tipo_construccion in (Asentamiento, Camino):
 				# Intento construir
 				while True:
-					s = input(f"Coloque {clase.__name__.lower()} n* {i+1}: ")
+					s = input(f"Coloque {tipo_construccion.__name__.lower()} n* {i+1}: ")
 					if s == "fin":
 						return
 					coords = s.translate(str.maketrans('', '', string.punctuation)).split()
-					construccion = construir(tablero, j, clase, coords, esGratis=True)
+					construccion = construir(tablero, j, tipo_construccion, coords, esGratis=True)
 					if construccion:
 						break
 				# Recursos iniciales
