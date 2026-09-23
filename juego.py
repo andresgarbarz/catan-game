@@ -44,7 +44,7 @@ def construir(tablero, jugador, tipo_construccion, coords, esGratis=False):
 	ficha, pos = map(int, coords)
 	return jugador.construir(tipo_construccion, tablero, ficha, pos, esGratis)
 
-def int_calcular_costos(lista_recursos):
+def calcular_costos(lista_recursos):
 	if len(lista_recursos) % 2 != 0:
 		print(ERROR_INT_FORMAT)
 		return False
@@ -64,7 +64,7 @@ def int_calcular_costos(lista_recursos):
 
 		cant = int(cant)
 		if cant < 1:
-			print("No es posible intercambiar 0 recursos, no se aceptan regalos!")
+			print("No es posible dar 0 recursos")
 			return False
 
 		costos[rec] = cant	
@@ -94,16 +94,37 @@ def jugar_catan(jugadores,tablero):
 							if tablero.obtener_nodo(f, v) == nodo:
 								construccion.dar_recurso(tablero.obtener_recurso_de_ficha(f))
 
+	ficha_ladron = 10
 	# Juego
 	while True:
 		for j in jugadores:
 			dados = tirar_dados()
+			if dados == 7:
+				# Descartar >7 cartas
+				for ju in jugadores:
+					total = sum(ju.recursos.values())
+					if total > 7:
+						print(f"--{ju.nombre} debe descartar {total//2} cartas--")
+				# Colocar ladron
+				while True:
+					ladron_target = input(f"{j.nombre}, a qué ficha desea mover el ladrón: ")
+					if not isdigit(ladron_target):
+						print(f"Debe ingresar un número entre 1 y 19, excepto el 10 y {ficha_ladron}")
+						continue
+					ladron_target = int(ladron_target)
+					if ladron_target == 10 or ladron_target not in range(1,20) or ladron_target == ficha_ladron:
+						print(f"Debe ingresar un número entre 1 y 19, excepto el 10 y {ficha_ladron}")
+						continue
+					tablero.sacar_ladron(ficha_ladron)
+					tablero.colocar_ladron(ladron_target)
+					ficha_ladron = ladron_target
+					break
 			for ficha in range(1, 20):
 				# Desierto
 				if ficha == 10:
 					continue
 				# Resto del tablero
-				if (tablero.obtener_numero_de_ficha(ficha) == dados):
+				if (tablero.obtener_numero_de_ficha(ficha) == dados and not tablero.tiene_ladron(ficha)):
 					asentamientos = tablero.asentamientos_por_ficha(ficha)
 					for ase in asentamientos:
 						if ase is not None:
@@ -140,13 +161,13 @@ def jugar_catan(jugadores,tablero):
 					# Chequeo materiales deseados
 					doy_pos = partes.index('doy')
 					deseados = partes[3:doy_pos]
-					recibidos = int_calcular_costos(deseados)
+					recibidos = calcular_costos(deseados)
 					if not recibidos:
 						continue
 
 					# Chequeo materiales ofrecidos
 					ofrecidos = partes[doy_pos+1:]
-					entregados = int_calcular_costos(ofrecidos)
+					entregados = calcular_costos(ofrecidos)
 					if not entregados:
 						continue
 					
