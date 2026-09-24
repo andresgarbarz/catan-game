@@ -1,16 +1,26 @@
 import random
 from re import M
 import string
+from typing import Any
 
 from _pytest._py.error import R
 from numpy.char import isalpha, isdigit
 
-from clases import Asentamiento, Camino
+from clases import Asentamiento, Camino, Jugador
 ORDEN_ESPECIAL = True
 
 MATERIALES = ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]
 
-ERROR_INT_FORMAT = "Para intercambiar, ingrese 'int [target] quiero [cant] [recurso] (n veces) doy [cant] [recurso] (m veces)'"
+ERROR = {
+    "int": (
+        "Para intercambiar, ingrese "
+        "'int [target] quiero [cant] [recurso] (n veces) doy [cant] [recurso] (m veces)'"
+    ),
+    "desc": (
+        "Ingresa "
+        "'desc [cant] [recurso] (n veces) ... [cant] [recurso] (m veces)'"
+    ),
+}
 
 def tirar_dados():
 	return random.randint(1,6) + random.randint(1,6)
@@ -44,9 +54,9 @@ def construir(tablero, jugador, tipo_construccion, coords, esGratis=False):
 	ficha, pos = map(int, coords)
 	return jugador.construir(tipo_construccion, tablero, ficha, pos, esGratis)
 
-def calcular_costos(lista_recursos):
+def calcular_costos(lista_recursos, op):
 	if len(lista_recursos) % 2 != 0:
-		print(ERROR_INT_FORMAT)
+		print(ERROR[op])
 		return False
 
 	costos = {}
@@ -55,7 +65,7 @@ def calcular_costos(lista_recursos):
 		cant = lista_recursos[i]
 		rec = lista_recursos[i+1].capitalize()
 		if not isdigit(cant) or not isalpha(rec):
-			print(ERROR_INT_FORMAT)
+			print(ERROR[op])
 			return False
 
 		if rec not in MATERIALES:
@@ -101,10 +111,34 @@ def jugar_catan(jugadores,tablero):
 			dados = tirar_dados()
 			if dados == 7:
 				# Descartar >7 cartas
-				for ju in jugadores:
-					total = sum(ju.recursos.values())
+				for jug in jugadores:
+					total = sum(jug.recursos.values())
 					if total > 7:
-						print(f"--{ju.nombre} debe descartar {total//2} cartas--")
+						while True:
+							# desc 1 madera 3 lana
+							accion = input(f"{jug.nombre} debe descartar {total//2} cartas, ingreselas con desc ... : ")
+							indeseados = accion.lower().translate(str.maketrans('', '', string.punctuation)).split()
+
+							if len(indeseados) < 3 or indeseados[0] != "desc":
+								print(ERROR["desc"])
+								continue
+
+							descarte = calcular_costos(indeseados[1:], "desc")
+
+							if not descarte:
+								continue
+
+							cant = sum(descarte.values())
+							if cant != total // 2:
+								print(f"Tenés que descartar {total//2} cartas, genio!")
+								continue
+
+							if not jug.cobrar(descarte):
+								print(f"{jug.nombre}, no tenés esos recursos, ratón")
+								continue
+							
+							break
+
 				# Colocar ladron
 				while True:
 					ladron_target = input(f"{j.nombre}, a qué ficha desea mover el ladrón: ")
@@ -112,13 +146,70 @@ def jugar_catan(jugadores,tablero):
 						print(f"Debe ingresar un número entre 1 y 19, excepto el 10 y {ficha_ladron}")
 						continue
 					ladron_target = int(ladron_target)
-					if ladron_target == 10 or ladron_target not in range(1,20) or ladron_target == ficha_ladron:
-						print(f"Debe ingresar un número entre 1 y 19, excepto el 10 y {ficha_ladron}")
+					if ladron_target == 10 or ladron_target not in range(1,20) or tablero.tiene_ladron(ladron_target):
+						str_10 = "y 10" if ficha_ladron != 10 else ""
+						print(f"Debe ingresar un número entre 1 y 19, excepto {ficha_ladron} {str_10}")
 						continue
 					tablero.sacar_ladron(ficha_ladron)
 					tablero.colocar_ladron(ladron_target)
 					ficha_ladron = ladron_target
 					break
+
+				# Armo set de robables
+				robables = set[Any]()
+				for v in range(1, 7):
+					ase = tablero.obtener_asentamiento(ficha_ladron, v)
+					if ase and ase.jugador and ase.jugador != j:
+						robables.add(ase.jugador)
+				
+				# Elegir victima
+				while True:
+					# No hay robables
+					if not robables:
+						print("No tenés a quien robarle, salamín!")
+						break
+					
+					# Busco victima
+					victima = None
+					target = input("Ingrese el nombre de un jugador: ")
+
+					nombres_robables = []
+					for r in robables:
+						nombres_robables.append(r.nombre)
+						if target.lower() == r.nombre.lower():
+							victima = r
+
+					# Jugador inválido
+					if not victima:
+						print("Debe ingresar un nombre de jugador válido.\nLa lista de jugadores es:", list(nombres_robables))
+						continue
+
+					# Mezclar cartas
+					cartas = [rec for rec, cant in victima.recursos.items() for i in range(cant)]
+					random.shuffle(cartas)
+					break
+
+				# Robar
+				while robables:
+					if len(cartas) > 1:
+						index = input(f"Ingrese un numero entre 1 y {len(cartas)}: ")
+						if not isdigit(index) or int(index) not in range(1, len(cartas)+1):
+							print(f"Tenes que ingresar un numero entre 1 y {len(cartas)+1}, capo!")
+							continue
+
+						index = int(index) - 1
+
+						print(f"Robaste un {cartas[index]}")
+
+					else:
+						index = 0
+						print(f"Robaste lo único que tenía {victima.nombre}: 1 {cartas[index]}")
+
+					victima.cobrar({cartas[index]: 1})
+					j.heredar({cartas[index]: 1})
+
+					break
+
 			for ficha in range(1, 20):
 				# Desierto
 				if ficha == 10:
@@ -141,7 +232,7 @@ def jugar_catan(jugadores,tablero):
 				elif cmd == "int":	
 					# Formato inválido 
 					if len(partes) < 8 or partes[2] != "quiero" or "doy" not in partes[:-2]:
-						print(ERROR_INT_FORMAT)
+						print(ERROR[cmd])
 						continue
 
 					# Obtengo target
@@ -161,19 +252,24 @@ def jugar_catan(jugadores,tablero):
 					# Chequeo materiales deseados
 					doy_pos = partes.index('doy')
 					deseados = partes[3:doy_pos]
-					recibidos = calcular_costos(deseados)
+					recibidos = calcular_costos(deseados, cmd)
 					if not recibidos:
 						continue
 
 					# Chequeo materiales ofrecidos
 					ofrecidos = partes[doy_pos+1:]
-					entregados = calcular_costos(ofrecidos)
+					entregados = calcular_costos(ofrecidos, cmd)
 					if not entregados:
 						continue
 					
 					# Tradear
-					j.cobrar(entregados)
-					target.cobrar(recibidos)
+					if not j.cobrar(entregados):
+						print(f"{j.nombre}, no tenés esos recursos, ratón")
+						continue
+
+					if not target.cobrar(recibidos):
+						print(f"{target.nombre} no tiene esos recursos, bobo")
+						continue
 
 					j.heredar(recibidos)
 					target.heredar(entregados)
