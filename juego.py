@@ -3,6 +3,8 @@ from re import M
 import string
 from typing import Any
 
+from victoria import larguisimo 
+
 from _pytest._py.error import R
 from numpy.char import isalpha, isdigit
 
@@ -80,7 +82,10 @@ def calcular_costos(lista_recursos, op):
 		costos[rec] = cant	
 	return costos
 
-def jugar_catan(jugadores,tablero):
+def jugar_catan(jugadores, tablero):
+	camino_mas_largo = 4
+	torre = None
+
 	# Set up
 	for i in range(2):
 		orden = jugadores if i == 0 else reversed(jugadores)
@@ -227,10 +232,43 @@ def jugar_catan(jugadores,tablero):
 				cmd = partes[0] if partes else ""
 				if cmd == "ase":
 					construir(tablero, j, Asentamiento, partes[1:])
+
+					# Recalculo camino más largo por si le cortaron a la torre
+					if torre is not None:
+						torre_long = larguisimo(tablero, torre)
+
+					# Torre pierde camino más largo, veo si se lo doy a otro o no
+					if torre is None or torre_long < camino_mas_largo:
+						camino_mas_largo = 4
+						longs = {}
+						for juga in jugadores:
+							l = larguisimo(tablero, juga)
+							if l not in longs:
+								longs[l] = []
+							longs[l].append(juga)
+
+						# Reviso que otros jugadores cumplan
+						long_max = max(longs.keys())
+						candidatos = []
+						if long_max > camino_mas_largo:
+							camino_mas_largo = long_max
+							candidatos = longs[camino_mas_largo]
+
+						if len(candidatos) == 1:
+							torre = candidatos[0]
+						elif torre in candidatos:
+							continue
+						else:
+							torre = None
 				elif cmd == "ciu":
 					construir(tablero, j, Ciudad, partes[1:])
 				elif cmd == "cam":
 					construir(tablero, j, Camino, partes[1:])
+					long = larguisimo(tablero, j)
+					if long > camino_mas_largo:
+						camino_mas_largo = long
+						torre = j
+						print(f"La torre ahora es {torre.nombre}")
 				elif cmd == "int":	
 					# Formato inválido 
 					if len(partes) < 8 or partes[2] != "quiero" or "doy" not in partes[:-2]:
