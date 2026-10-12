@@ -61,6 +61,10 @@ class Ciudad(Construccion):
 	tipo_pos = "vertice"
 	costo = {"Trigo": 2, "Piedra": 3}
 
+	def dar_recurso(self, rec):
+		for _ in range(2):
+			self.jugador.añadir_recurso(rec)
+
 	@classmethod
 	def ocupado(cls, tablero, ficha, pos):
 		return isinstance(tablero.obtener_asentamiento(ficha, pos), Ciudad)
@@ -68,6 +72,11 @@ class Ciudad(Construccion):
 	@classmethod
 	def colocar_en(cls, tablero, ficha, pos, jugador):
 		tablero.colocar_asentamiento(ficha, pos, cls(jugador))
+
+	@classmethod
+	def construccion_valida(cls, tablero, ficha, pos, jugador):
+		ase = tablero.obtener_asentamiento(ficha, pos)
+		return ase is not None and ase.jugador == jugador
 
 class Camino(Construccion):
 	tipo_pos = "arista"

@@ -6,7 +6,7 @@ from typing import Any
 from _pytest._py.error import R
 from numpy.char import isalpha, isdigit
 
-from clases import Asentamiento, Camino, Jugador
+from clases import Asentamiento, Camino, Ciudad
 ORDEN_ESPECIAL = True
 
 MATERIALES = ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]
@@ -227,6 +227,8 @@ def jugar_catan(jugadores,tablero):
 				cmd = partes[0] if partes else ""
 				if cmd == "ase":
 					construir(tablero, j, Asentamiento, partes[1:])
+				elif cmd == "ciu":
+					construir(tablero, j, Ciudad, partes[1:])
 				elif cmd == "cam":
 					construir(tablero, j, Camino, partes[1:])
 				elif cmd == "int":	
@@ -278,7 +280,6 @@ def jugar_catan(jugadores,tablero):
 					# int [target-nombre] [{Recursos-deseados}] [{Recursos-ofrecidos}]
 					# Ejemplo:
 					# int Natan quiero 1 Lana 1 Trigo doy 1 Ladrillo
-					
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":
