@@ -124,10 +124,16 @@ class Caballero(CartaDesarrollo):
 			print("No tiene un caballero, don.")
 			return False
 
+# todo: pasar logica al padre y usar super()
 class Caminos(CartaDesarrollo):
 	@classmethod
-	def usar():
-		pass
+	def usar(self, jugador):
+		if self in jugador.cartas:
+			jugador.cartas.remove(self)
+			return True
+		else:
+			print("No tiene carta de caminos, mister.")
+			return False
 
 class Recursos(CartaDesarrollo):
 	@classmethod

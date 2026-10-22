@@ -162,7 +162,8 @@ def jugar_catan(jugadores, tablero):
 	ejercito = 2
 	general = None
 
-	mazo = ([Caballero]*14 + [Caminos]*2 + [Recursos]*2 + [Monopolio]*2 + [Puntos]*6)
+	# mazo = ([Caballero]*14 + [Caminos]*2 + [Recursos]*2 + [Monopolio]*2 + [Puntos]*6)
+	mazo = ([Caminos]*2)
 	random.shuffle(mazo)
 
 	# Set up
@@ -334,7 +335,17 @@ def jugar_catan(jugadores, tablero):
 					if Caballero.usar(j):
 						usar_ladron(tablero, j, ficha_ladron)
 					if j.caballeros > ejercito:
+						ejercito += 1
 						general = j
+				elif cmd == "via":
+					if Caminos.usar(j):
+						for i in range(2):
+							while True:
+								s = input(f"Coloque el camino n* {i+1}: ")
+								coords = s.translate(str.maketrans('', '', string.punctuation)).split()
+								construccion = construir(tablero, j, tipo_construccion, coords, esGratis=True)
+								if construccion:
+									break
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":
