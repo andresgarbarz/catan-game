@@ -8,7 +8,7 @@ from victoria import larguisimo
 from _pytest._py.error import R
 from numpy.char import isalpha, isdigit
 
-from clases import Asentamiento, Camino, Ciudad
+from clases import Asentamiento, Caballero, Camino, Caminos, Ciudad, Monopolio, Puntos, Recursos
 ORDEN_ESPECIAL = True
 
 MATERIALES = ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]
@@ -47,7 +47,7 @@ def rellenar_tablero(tablero):
 	j = 0
 	for ficha in espiral:
 		tablero.colocar_recurso_y_numero(ficha, recursos[j], numeros[j])
-		j += 1
+		j += 1	
 
 def construir(tablero, jugador, tipo_construccion, coords, esGratis=False):
 	if len(coords) != 2:
@@ -82,9 +82,88 @@ def calcular_costos(lista_recursos, op):
 		costos[rec] = cant	
 	return costos
 
+def usar_ladron(tablero, j, ficha_ladron):
+	# Colocar ladron
+	while True:
+		ladron_target = input(f"{j.nombre}, a qué ficha desea mover el ladrón: ")
+		if not isdigit(ladron_target):
+			print(f"Debe ingresar un número entre 1 y 19, excepto el 10 y {ficha_ladron}")
+			continue
+		ladron_target = int(ladron_target)
+		if ladron_target == 10 or ladron_target not in range(1,20) or tablero.tiene_ladron(ladron_target):
+			str_10 = "y 10" if ficha_ladron != 10 else ""
+			print(f"Debe ingresar un número entre 1 y 19, excepto {ficha_ladron} {str_10}")
+			continue
+		tablero.sacar_ladron(ficha_ladron)
+		tablero.colocar_ladron(ladron_target)
+		ficha_ladron = ladron_target
+		break
+
+	# Armo set de robables
+	robables = set[Any]()
+	for v in range(1, 7):
+		ase = tablero.obtener_asentamiento(ficha_ladron, v)
+		if ase and ase.jugador and ase.jugador != j:
+			robables.add(ase.jugador)
+
+	# Elegir victima
+	while True:
+		# No hay robables
+		if not robables:
+			print("No tenés a quien robarle, salamín!")
+			break
+		
+		# Busco victima
+		victima = None
+		target = input("Ingrese el nombre de un jugador: ")
+
+		nombres_robables = []
+		for r in robables:
+			nombres_robables.append(r.nombre)
+			if target.lower() == r.nombre.lower():
+				victima = r
+
+		# Jugador inválido
+		if not victima:
+			print("Debe ingresar un nombre de jugador válido.\nLa lista de jugadores es:", list(nombres_robables))
+			continue
+
+		# Mezclar cartas
+		cartas = [rec for rec, cant in victima.recursos.items() for i in range(cant)]
+		random.shuffle(cartas)
+		break
+
+	# Robar
+	while robables:
+		if len(cartas) > 1:
+			index = input(f"Ingrese un numero entre 1 y {len(cartas)}: ")
+			if not isdigit(index) or int(index) not in range(1, len(cartas)+1):
+				print(f"Tenes que ingresar un numero entre 1 y {len(cartas)+1}, capo!")
+				continue
+
+			index = int(index) - 1
+
+			print(f"Robaste un {cartas[index]}")
+
+		else:
+			index = 0
+			print(f"Robaste lo único que tenía {victima.nombre}: 1 {cartas[index]}")
+
+		victima.cobrar({cartas[index]: 1})
+		j.heredar({cartas[index]: 1})
+
+		break
+
+	return ficha_ladron
+
 def jugar_catan(jugadores, tablero):
 	camino_mas_largo = 4
 	torre = None
+	ejercito = 2
+	general = None
+
+	mazo = ([Caballero]*14 + [Caminos]*2 + [Recursos]*2 + [Monopolio]*2 + [Puntos]*6)
+	random.shuffle(mazo)
 
 	# Set up
 	for i in range(2):
@@ -144,76 +223,7 @@ def jugar_catan(jugadores, tablero):
 							
 							break
 
-				# Colocar ladron
-				while True:
-					ladron_target = input(f"{j.nombre}, a qué ficha desea mover el ladrón: ")
-					if not isdigit(ladron_target):
-						print(f"Debe ingresar un número entre 1 y 19, excepto el 10 y {ficha_ladron}")
-						continue
-					ladron_target = int(ladron_target)
-					if ladron_target == 10 or ladron_target not in range(1,20) or tablero.tiene_ladron(ladron_target):
-						str_10 = "y 10" if ficha_ladron != 10 else ""
-						print(f"Debe ingresar un número entre 1 y 19, excepto {ficha_ladron} {str_10}")
-						continue
-					tablero.sacar_ladron(ficha_ladron)
-					tablero.colocar_ladron(ladron_target)
-					ficha_ladron = ladron_target
-					break
-
-				# Armo set de robables
-				robables = set[Any]()
-				for v in range(1, 7):
-					ase = tablero.obtener_asentamiento(ficha_ladron, v)
-					if ase and ase.jugador and ase.jugador != j:
-						robables.add(ase.jugador)
-				
-				# Elegir victima
-				while True:
-					# No hay robables
-					if not robables:
-						print("No tenés a quien robarle, salamín!")
-						break
-					
-					# Busco victima
-					victima = None
-					target = input("Ingrese el nombre de un jugador: ")
-
-					nombres_robables = []
-					for r in robables:
-						nombres_robables.append(r.nombre)
-						if target.lower() == r.nombre.lower():
-							victima = r
-
-					# Jugador inválido
-					if not victima:
-						print("Debe ingresar un nombre de jugador válido.\nLa lista de jugadores es:", list(nombres_robables))
-						continue
-
-					# Mezclar cartas
-					cartas = [rec for rec, cant in victima.recursos.items() for i in range(cant)]
-					random.shuffle(cartas)
-					break
-
-				# Robar
-				while robables:
-					if len(cartas) > 1:
-						index = input(f"Ingrese un numero entre 1 y {len(cartas)}: ")
-						if not isdigit(index) or int(index) not in range(1, len(cartas)+1):
-							print(f"Tenes que ingresar un numero entre 1 y {len(cartas)+1}, capo!")
-							continue
-
-						index = int(index) - 1
-
-						print(f"Robaste un {cartas[index]}")
-
-					else:
-						index = 0
-						print(f"Robaste lo único que tenía {victima.nombre}: 1 {cartas[index]}")
-
-					victima.cobrar({cartas[index]: 1})
-					j.heredar({cartas[index]: 1})
-
-					break
+				ficha_ladron = usar_ladron(tablero, j, ficha_ladron)
 
 			for ficha in range(1, 20):
 				# Desierto
@@ -318,6 +328,13 @@ def jugar_catan(jugadores, tablero):
 					# int [target-nombre] [{Recursos-deseados}] [{Recursos-ofrecidos}]
 					# Ejemplo:
 					# int Natan quiero 1 Lana 1 Trigo doy 1 Ladrillo
+				elif cmd == "des":
+					mazo = j.comprar_desarrollo(mazo)
+				elif cmd == "cab":
+					if Caballero.usar(j):
+						usar_ladron(tablero, j, ficha_ladron)
+					if j.caballeros > ejercito:
+						general = j
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":

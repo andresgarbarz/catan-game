@@ -105,13 +105,57 @@ class Camino(Construccion):
 	def colocar_en(cls, tablero, ficha, pos, jugador):
 		return tablero.colocar_camino(ficha, pos, cls(jugador))
 
+class CartaDesarrollo:
+	costo = {"Piedra": 1, "Trigo": 1, "Lana": 1}
+	usable = False
+
+	@classmethod
+	def usar():
+		raise NotImplementedError
+
+class Caballero(CartaDesarrollo):
+	@classmethod
+	def usar(self, jugador):
+		if self in jugador.cartas:
+			jugador.cartas.remove(self)
+			jugador.caballeros += 1
+			return True
+		else:
+			print("No tiene un caballero, don.")
+			return False
+
+class Caminos(CartaDesarrollo):
+	@classmethod
+	def usar():
+		pass
+
+class Recursos(CartaDesarrollo):
+	@classmethod
+	def usar():
+		pass
+
+class Monopolio(CartaDesarrollo):
+	@classmethod
+	def usar():
+		pass
+
+class Puntos(CartaDesarrollo):
+	@classmethod
+	def usar():
+		pass
+
 class Jugador:
 	def __init__(self, nombre, color) -> None:
 		self.nombre = nombre
 		self.color = color
 		self.recursos = {rec: 0 for rec in ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]}
 		self.asentamientos = 0
+		# todo: Chequear
 		self.caminos = 0
+		
+		self.caballeros = 0
+		# Cartas de desarrollo, salvo puntos
+		self.cartas = set()
 
 	def añadir_recurso(self, rec):
 		self.recursos[rec] += 1
@@ -137,6 +181,18 @@ class Jugador:
 			print("No tiene recursos suficientes")
 			return False
 		return clase.colocar_en(tablero, ficha, pos, self)
+
+	def comprar_desarrollo(self, mazo):
+		if not self.cobrar(CartaDesarrollo.costo):
+			print("No tiene recursos suficientes")
+			return False
+		if len(mazo) == 0:
+			print("No hay más cartas de desarrollo en el mazo")
+			return False
+		carta = mazo.pop()
+		print(f"{self.nombre} obtuvo {carta}")
+		self.cartas.add(carta)
+		return mazo
 
 	def cantidad_de(self, rec):
 		return self.recursos[rec]
