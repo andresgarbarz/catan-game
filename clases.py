@@ -108,42 +108,34 @@ class Camino(Construccion):
 class CartaDesarrollo:
 	costo = {"Piedra": 1, "Trigo": 1, "Lana": 1}
 	usable = False
+	mensaje_falta = "No tiene esa carta."
 
 	@classmethod
-	def usar():
-		raise NotImplementedError
+	def usar(cls, jugador):
+		if cls not in jugador.cartas:
+			print(cls.mensaje_falta)
+			return False
+		jugador.cartas.remove(cls)
+		return True
 
 class Caballero(CartaDesarrollo):
-	@classmethod
-	def usar(self, jugador):
-		if self in jugador.cartas:
-			jugador.cartas.remove(self)
-			jugador.caballeros += 1
-			return True
-		else:
-			print("No tiene un caballero, don.")
-			return False
+	mensaje_falta = "No tiene un caballero, don."
 
-# todo: pasar logica al padre y usar super()
-class Caminos(CartaDesarrollo):
 	@classmethod
-	def usar(self, jugador):
-		if self in jugador.cartas:
-			jugador.cartas.remove(self)
-			return True
-		else:
-			print("No tiene carta de caminos, mister.")
+	def usar(cls, jugador):
+		if not super().usar(jugador):
 			return False
+		jugador.caballeros += 1
+		return True
+
+class Caminos(CartaDesarrollo):
+	mensaje_falta = "No tiene carta de caminos, mister."
 
 class Recursos(CartaDesarrollo):
-	@classmethod
-	def usar():
-		pass
+	mensaje_falta = "No tenés carta de recursos, compañero"
 
 class Monopolio(CartaDesarrollo):
-	@classmethod
-	def usar():
-		pass
+	mensaje_falta = "No tiene carta de monopolio, socio"
 
 class Puntos(CartaDesarrollo):
 	@classmethod
@@ -156,7 +148,7 @@ class Jugador:
 		self.color = color
 		self.recursos = {rec: 0 for rec in ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]}
 		self.asentamientos = 0
-		# todo: Chequear
+		# TODO: Chequear
 		self.caminos = 0
 		
 		self.caballeros = 0

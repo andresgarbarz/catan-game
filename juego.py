@@ -163,7 +163,7 @@ def jugar_catan(jugadores, tablero):
 	general = None
 
 	# mazo = ([Caballero]*14 + [Caminos]*2 + [Recursos]*2 + [Monopolio]*2 + [Puntos]*6)
-	mazo = ([Caminos]*2)
+	mazo = ([Monopolio]*2)
 	random.shuffle(mazo)
 
 	# Set up
@@ -346,6 +346,30 @@ def jugar_catan(jugadores, tablero):
 								construccion = construir(tablero, j, tipo_construccion, coords, esGratis=True)
 								if construccion:
 									break
+				elif cmd == "rec":
+					if Recursos.usar(j):
+						for i in range(2):
+							while True:
+								rec = input(f"Ingrese el recurso n* {i+1}: ").strip().capitalize()
+								if rec not in MATERIALES:
+									print("Debe ingresar un recurso válido, la lista es:", MATERIALES)
+								else:
+									j.recursos[rec] += 1
+									break
+				elif cmd == "mon":
+					if Monopolio.usar(j):
+						while True:
+							rec = input(f"Ingrese el recurso a apropiar: ").strip().capitalize()
+							if rec not in MATERIALES:
+								print("Debe ingresar un recurso válido, la lista es:", MATERIALES)
+							else:
+								break
+
+						for jug in jugadores:
+							if jug == j:
+								continue
+							j.recursos[rec] += jug.recursos[rec]
+							jug.recursos[rec] = 0
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":

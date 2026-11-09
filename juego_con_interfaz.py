@@ -12,9 +12,10 @@ from tablero import TableroCatan
 
 andy = Jugador("Andy", (255,0,0))
 natan = Jugador("Natan", (0,255,0))
+pollas = Jugador("Pollas", (0,0,255))
 
 # Lista de jugadores
-jugadores = [andy, natan]
+jugadores = [andy, natan, pollas]
 
 # Tablero
 tablero_a_jugar = TableroCatan()
@@ -23,7 +24,7 @@ tablero_a_jugar = TableroCatan()
 rellenar_tablero(tablero_a_jugar)
 
 if "start" in sys.argv[1:]:
-    colocaciones = ["1 1", "1 1", "2 2", "2 2", "3 3", "3 3", "4 4", "4 4"]
+    colocaciones = [f"{i // 2 + 14} 1" for i in range(len(jugadores) * 4)]
     _input = builtins.input
     def input_start(prompt=""):
         if colocaciones:
