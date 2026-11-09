@@ -55,6 +55,7 @@ class Asentamiento(Construccion):
 
 	@classmethod
 	def colocar_en(cls, tablero, ficha, pos, jugador):
+		jugador.puntos += 1
 		return tablero.colocar_asentamiento(ficha, pos, cls(jugador))
 
 class Ciudad(Construccion):
@@ -71,6 +72,7 @@ class Ciudad(Construccion):
 
 	@classmethod
 	def colocar_en(cls, tablero, ficha, pos, jugador):
+		jugador.puntos += 1
 		tablero.colocar_asentamiento(ficha, pos, cls(jugador))
 
 	@classmethod
@@ -103,6 +105,7 @@ class Camino(Construccion):
 
 	@classmethod
 	def colocar_en(cls, tablero, ficha, pos, jugador):
+		jugador.caminos += 1
 		return tablero.colocar_camino(ficha, pos, cls(jugador))
 
 class CartaDesarrollo:
@@ -139,17 +142,17 @@ class Monopolio(CartaDesarrollo):
 
 class Puntos(CartaDesarrollo):
 	@classmethod
-	def usar():
-		pass
+	def usar(cls, jugador):
+		raise NotImplementedError
 
 class Jugador:
 	def __init__(self, nombre, color) -> None:
 		self.nombre = nombre
 		self.color = color
 		self.recursos = {rec: 0 for rec in ["Ladrillo", "Piedra", "Trigo", "Lana", "Madera"]}
-		self.asentamientos = 0
 		# TODO: Chequear
 		self.caminos = 0
+		self.puntos = 0
 		
 		self.caballeros = 0
 		# Cartas de desarrollo, salvo puntos
@@ -190,6 +193,8 @@ class Jugador:
 		carta = mazo.pop()
 		print(f"{self.nombre} obtuvo {carta}")
 		self.cartas.add(carta)
+		if carta == Puntos:
+			self.puntos += 1
 		return mazo
 
 	def cantidad_de(self, rec):

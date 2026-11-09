@@ -26,3 +26,4 @@ def larguisimo(tablero, jugador):
                     if nodo is not None:
                         nodos.add(nodo)
     return max((largo(n, jugador, set()) for n in nodos), default=0)
+

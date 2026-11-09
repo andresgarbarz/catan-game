@@ -156,14 +156,25 @@ def usar_ladron(tablero, j, ficha_ladron):
 
 	return ficha_ladron
 
+def dar_torre(torre, nueva):
+	if nueva is torre:
+		return torre
+	if torre is not None:
+		torre.puntos -= 2
+	if nueva is not None:
+		nueva.puntos += 2
+		print(f"La torre ahora es {nueva.nombre}")
+	else:
+		print("Nadie tiene el camino más largo")
+	return nueva
+
 def jugar_catan(jugadores, tablero):
 	camino_mas_largo = 4
 	torre = None
 	ejercito = 2
 	general = None
 
-	# mazo = ([Caballero]*14 + [Caminos]*2 + [Recursos]*2 + [Monopolio]*2 + [Puntos]*6)
-	mazo = ([Monopolio]*2)
+	mazo = ([Caballero]*14 + [Caminos]*2 + [Recursos]*2 + [Monopolio]*2 + [Puntos]*6)
 	random.shuffle(mazo)
 
 	# Set up
@@ -266,11 +277,11 @@ def jugar_catan(jugadores, tablero):
 							candidatos = longs[camino_mas_largo]
 
 						if len(candidatos) == 1:
-							torre = candidatos[0]
+							torre = dar_torre(torre, candidatos[0])
 						elif torre in candidatos:
 							continue
 						else:
-							torre = None
+							torre = dar_torre(torre, None)
 				elif cmd == "ciu":
 					construir(tablero, j, Ciudad, partes[1:])
 				elif cmd == "cam":
@@ -278,8 +289,7 @@ def jugar_catan(jugadores, tablero):
 					long = larguisimo(tablero, j)
 					if long > camino_mas_largo:
 						camino_mas_largo = long
-						torre = j
-						print(f"La torre ahora es {torre.nombre}")
+						torre = dar_torre(torre, j)
 				elif cmd == "int":	
 					# Formato inválido 
 					if len(partes) < 8 or partes[2] != "quiero" or "doy" not in partes[:-2]:
@@ -333,10 +343,14 @@ def jugar_catan(jugadores, tablero):
 					mazo = j.comprar_desarrollo(mazo)
 				elif cmd == "cab":
 					if Caballero.usar(j):
-						usar_ladron(tablero, j, ficha_ladron)
+						ficha_ladron = usar_ladron(tablero, j, ficha_ladron)
 					if j.caballeros > ejercito:
 						ejercito += 1
+						if general is not None:
+							general.puntos -= 2
 						general = j
+						print(f"A sus ordenes, general {j.nombre}!")
+						general.puntos += 2
 				elif cmd == "via":
 					if Caminos.usar(j):
 						for i in range(2):
@@ -370,6 +384,12 @@ def jugar_catan(jugadores, tablero):
 								continue
 							j.recursos[rec] += jug.recursos[rec]
 							jug.recursos[rec] = 0
+				elif cmd == "gan":
+					if j.puntos >= 10:
+						print(f"Ganaste, {j.nombre}!!!")
+						return
+					else:
+						print(f"Estas ahí nomás maestro, tenés {j.puntos} puntos")
 				elif cmd == "fin":
 					return
 				elif cmd == "pas":
