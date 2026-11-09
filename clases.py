@@ -156,7 +156,7 @@ class Jugador:
 		
 		self.caballeros = 0
 		# Cartas de desarrollo, salvo puntos
-		self.cartas = set()
+		self.cartas = []
 
 	def añadir_recurso(self, rec):
 		self.recursos[rec] += 1
@@ -192,7 +192,7 @@ class Jugador:
 			return False
 		carta = mazo.pop()
 		print(f"{self.nombre} obtuvo {carta}")
-		self.cartas.add(carta)
+		self.cartas.append(carta)
 		if carta == Puntos:
 			self.puntos += 1
 		return mazo
